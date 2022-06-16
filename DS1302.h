@@ -8,54 +8,66 @@
 sbit SCK=P1^4;		
 sbit SDA=P1^5;		
 sbit RST=P1^6;
-//¸´Î»½Å
-#define RST_CLR	RST=0//µçÆ½ÖÃµÍ
-#define RST_SET	RST=1//µçÆ½ÖÃ¸ß
+//ï¿½ï¿½Î»ï¿½ï¿½
+#define RST_CLR	RST=0//ï¿½ï¿½Æ½ï¿½Ãµï¿½
+#define RST_SET	RST=1//ï¿½ï¿½Æ½ï¿½Ã¸ï¿½
 
 
-//Ë«ÏòÊý¾Ý
-#define IO_CLR	SDA=0//µçÆ½ÖÃµÍ
-#define IO_SET	SDA=1//µçÆ½ÖÃ¸ß
-#define IO_R	SDA  //µçÆ½¶ÁÈ¡
+//Ë«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define IO_CLR	SDA=0//ï¿½ï¿½Æ½ï¿½Ãµï¿½
+#define IO_SET	SDA=1//ï¿½ï¿½Æ½ï¿½Ã¸ï¿½
+#define IO_R	SDA  //ï¿½ï¿½Æ½ï¿½ï¿½È¡
 
 
-//Ê±ÖÓÐÅºÅ
-#define SCK_CLR	SCK=0//Ê±ÖÓÐÅºÅ
-#define SCK_SET	SCK=1//µçÆ½ÖÃ¸ß
+//Ê±ï¿½ï¿½ï¿½Åºï¿½
+#define SCK_CLR	SCK=0//Ê±ï¿½ï¿½ï¿½Åºï¿½
+#define SCK_SET	SCK=1//ï¿½ï¿½Æ½ï¿½Ã¸ï¿½
 
 
-#define ds1302_sec_add			0x80		//ÃëÊý¾ÝµØÖ·
-#define ds1302_min_add			0x82		//·ÖÊý¾ÝµØÖ·
-#define ds1302_hr_add			0x84		//Ê±Êý¾ÝµØÖ·
-#define ds1302_date_add			0x86		//ÈÕÊý¾ÝµØÖ·
-#define ds1302_month_add		0x88		//ÔÂÊý¾ÝµØÖ·
-#define ds1302_day_add			0x8a		//ÐÇÆÚÊý¾ÝµØÖ·
-#define ds1302_year_add			0x8c		//ÄêÊý¾ÝµØÖ·
-#define ds1302_control_add		0x8e		//¿ØÖÆÊý¾ÝµØÖ·
+#define ds1302_sec_add			0x80		//1000_0000->write sec
+#define ds1302_min_add			0x82		//
+#define ds1302_hr_add			0x84		//Ê±ï¿½ï¿½ï¿½Ýµï¿½Ö·
+#define ds1302_date_add			0x86		//ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½Ö·
+#define ds1302_month_add		0x88		//ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½Ö·
+#define ds1302_day_add			0x8a		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½Ö·
+#define ds1302_year_add			0x8c		//ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½Ö·
+#define ds1302_control_add		0x8e		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½Ö·
 #define ds1302_charger_add		0x90 					 
 #define ds1302_clkburst_add		0xbe
 
-extern unsigned char time_buf1[8];//¿ÕÄêÔÂÈÕÊ±·ÖÃëÖÜ
-extern unsigned char time_buf[8] ;//¿ÕÄêÔÂÈÕÊ±·ÖÃëÖÜ
+#define ds1302_alarm_sec_add		0xc0//1100_0000 ram[0].write
+#define ds1302_alarm_min_add		0xc2//1100_0010 ram[1].write
+#define ds1302_alarm_hr_add		0xc4//1100_0100 ram[2].write
+
+
+
+extern unsigned char time_buf1[8];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+extern unsigned char time_buf[8] ;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+extern unsigned char alarm_buf1[3];//demecial
+extern unsigned char alarm_buf[3];//BCD
 /*------------------------------------------------
-           ÏòDS1302Ð´ÈëÒ»×Ö½ÚÊý¾Ý
+           ï¿½ï¿½DS1302Ð´ï¿½ï¿½Ò»ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½
 ------------------------------------------------*/
 void Ds1302_Write_Byte(unsigned char addr, unsigned char d);
 /*------------------------------------------------
-           ´ÓDS1302¶Á³öÒ»×Ö½ÚÊý¾Ý
+           ï¿½ï¿½DS1302ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½
 ------------------------------------------------*/
 unsigned char Ds1302_Read_Byte(unsigned char addr) ;
 /*------------------------------------------------
-           ÏòDS1302Ð´ÈëÊ±ÖÓÊý¾Ý
+           ï¿½ï¿½DS1302Ð´ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 ------------------------------------------------*/
 void Ds1302_Write_Time(void) ;
 /*------------------------------------------------
-           ´ÓDS1302¶Á³öÊ±ÖÓÊý¾Ý
+           ï¿½ï¿½DS1302ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 ------------------------------------------------*/
 void Ds1302_Read_Time(void)  ;
 /*------------------------------------------------
-                DS1302³õÊ¼»¯
+                DS1302ï¿½ï¿½Ê¼ï¿½ï¿½
 ------------------------------------------------*/
+void Ds1302_Alarm_Write_Time(void) ;
+void Ds1302_Alarm_Read_Time(void)  ;
+
 void Ds1302_Init(void);
 
 #endif
