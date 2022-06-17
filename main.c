@@ -29,6 +29,7 @@ void Display(unsigned char FirstBit,unsigned char Num);//output the data onto 7s
 unsigned char KeyScan(void);//handle which button be pressed
 void Init_Timer0(void);//
 
+void UART_Init(void);
 unsigned char Timer0_H,Timer0_L,Time;//buffer of TH0 and TL0
                          // ¿…œ÷ª”–¬Ë¬Ë∫√ ˝æ›±Ì
 code unsigned char MUSIC[]={          6,2,3,      5,2,1,      3,2,2,    5,2,2,    1,3,2,    6,2,1,    5,2,1,
@@ -68,7 +69,7 @@ void Song(void)
             TH0=Timer0_H;//∏≥÷µ∂® ±∆˜ ±º‰£¨æˆ∂®∆µ¬ 
             TL0=Timer0_L;
             TR0=1;       //¥Úø™∂® ±∆˜
-            delay(Time); //—” ±À˘–Ë“™µƒΩ⁄≈ƒ  
+            DelayUs2x(Time); //—” ±À˘–Ë“™µƒΩ⁄≈ƒ  
         }
     } 
 }
@@ -85,8 +86,9 @@ bit is_sharp()
 ------------------------------------------------*/
 void main (void)
 {
+	unsigned char i;
     unsigned char num,displaynum;
-    static unsigned int num;    //by kept after how many instruction done to counting time then updated time from ds1302
+    static unsigned int cnt;    //by kept after how many instruction done to counting time then updated time from ds1302
     Init_Timer0();
     UART_Init();
     Ds1302_Init();
@@ -134,11 +136,11 @@ void main (void)
                 whether updated time from ds1302
         -----------------------------------------------------*/
         //suppose a num
-        if (num>20000)
+        if (cnt>20000)
         {
             ReadTimeFlag=1;
             ReadAlarmFlag=1;
-            num=0;
+            cnt=0;
         }
         
         //it suppose to get time from ds1302
@@ -202,7 +204,7 @@ void main (void)
         /*-----------------------------------------------------
             handling o'clock
         -----------------------------------------------------*/  
-        if(is_sharp){
+        if(is_sharp()){
             Song();
         }
          /*-----------------------------------------------------
@@ -310,36 +312,18 @@ void Init_Timer0(void)
  ET0=1;           //enable interupt from timer
  TR0=1;           //turn on timer0 to counting time
 }
-/*------------------------------------------------
-Timer 0 ISR
-to controll every 2 ms display a digital
-------------------------------------------------*/
-void Timer0_isr(void) interrupt 1
-{
- static unsigned int num;        //kept num
- TH0=(65536-2000)/256;          //2000 time about 2ms
- TL0=(65536-2000)%256;
- 
- Display(0,8);       //every 2ms display a digital of seg7 displayer
- num++;
- if(num==50)        //about100ms
-   {
-    num=0;
-    ReadTimeFlag=1; //ReadTimerFlag==1
-                    //read time from ds1302
-    }
-}
+
 /*------------------------------------------------
         Timer0 interupt service program
         to handle speaker
 ------------------------------------------------*/
 void Timer0_isr(void) interrupt 1 
 {
- TR0=0;      
- SPK=!SPK;
- TH0=Timer0_H;
- TL0=Timer0_L;
- TR0=1;
+ 	TR0=0;      
+ 	SPK=!SPK;
+	TH0=Timer0_H;
+ 	TL0=Timer0_L;
+ 	TR0=1;
 }
 /*------------------------------------------------
                 Uart init

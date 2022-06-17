@@ -40,7 +40,7 @@ sbit RST=P1^6;
 #define ds1302_alarm_hr_add		0xc4//1100_0100 ram[2].write
 
 
-
+extern unsigned char time_buf2[16];//catch assci on each digital
 extern unsigned char time_buf1[8];//��������ʱ������
 extern unsigned char time_buf[8] ;//��������ʱ������
 

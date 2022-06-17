@@ -5,6 +5,7 @@ unsigned char alarm_buf[3];//BCD
 //alarm_buf1[0]->hour
 //alarm_buf1[1]->min
 //alarm_buf1[2]->sec
+unsigned char time_buf2[16] ;
 unsigned char time_buf1[8] = {20,10,6,5,12,55,00,6};//demecial
 unsigned char time_buf[8] ;                         //BCD
 /*------------------------------------------------
@@ -179,7 +180,7 @@ void Ds1302_Alarm_Write_Time(void)
 	Ds1302_Write_Byte(ds1302_control_add,0x00);			//close write controll protect-> set to 0
 	
 	Ds1302_Write_Byte(ds1302_alarm_hr_add,alarm_buf[0]);		//hour
-	Ds1302_Write_Byte(ds1302_alarm_add,alarm_buf[1]);		//min
+	Ds1302_Write_Byte(ds1302_alarm_min_add,alarm_buf[1]);		//min
 	Ds1302_Write_Byte(ds1302_alarm_sec_add,alarm_buf[2]);		//sec
 	
 	Ds1302_Write_Byte(ds1302_control_add,0x80);			//reopen write controll protect
