@@ -26,10 +26,7 @@ byte instruction_type =2;//default countup
 unsigned long cnt;
 unsigned long pre_cnt;
 
-byte buf[MAX];
-byte tail = 0;
-byte head = 0;
-byte ms = 0;
+
 
 void timer_init()  //timer0
 {

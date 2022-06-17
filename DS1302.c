@@ -6,7 +6,7 @@ unsigned char alarm_buf[3];//BCD
 //alarm_buf1[1]->min
 //alarm_buf1[2]->sec
 unsigned char time_buf2[16] ;
-unsigned char time_buf1[8] = {20,10,6,5,12,55,00,6};//demecial
+unsigned char time_buf1[8] ;//demecial
 unsigned char time_buf[8] ;                         //BCD
 /*------------------------------------------------
            ��DS1302д��һ�ֽ�����
@@ -20,7 +20,7 @@ void Ds1302_Write_Byte(unsigned char addr, unsigned char d)
 	//write is first write addr into rs1302
 	//then write data into rs1302 
 	//there had been declared into write addr in the DS1302.h
-	addr = addr & 0xFE;     //let the lsb of addr ==0
+	
 	for (i = 0; i < 8; i ++) 
 	    { 
 		if (addr & 0x01) 
@@ -143,7 +143,7 @@ void Ds1302_Write_Time(void)
 ------------------------------------------------*/
 void Ds1302_Read_Time(void)  
 { 
-   	    unsigned char i,tmp;
+   	unsigned char i,tmp;
 	time_buf[1]=Ds1302_Read_Byte(ds1302_year_add);		//year
 	time_buf[2]=Ds1302_Read_Byte(ds1302_month_add);		//month
 	time_buf[3]=Ds1302_Read_Byte(ds1302_date_add);		//date
@@ -194,7 +194,7 @@ void Ds1302_Alarm_Read_Time(void)
 	
 	alarm_buf[0]=Ds1302_Read_Byte(ds1302_alarm_hr_add);		//hour
 	alarm_buf[1]=Ds1302_Read_Byte(ds1302_alarm_min_add);		//minute
-	alarm_buf[2]=(Ds1302_Read_Byte(ds1302_alarm_sec_add));//&0x7F;//sec
+	alarm_buf[2]=Ds1302_Read_Byte(ds1302_alarm_sec_add);//sec
 														//sec's msb is represent the counting or not 
 	//BCD translate to demical
 	for(i=0;i<3;i++)
@@ -215,8 +215,7 @@ void Ds1302_Init(void)
 {
 	
 	RST_CLR;			//RST���õ�
-	SCK_CLR;			//SCK���õ�
-    Ds1302_Write_Byte(ds1302_sec_add,0x00);				 
+	SCK_CLR;			//SCK���õ�		 
 }
 
 

@@ -8,12 +8,13 @@
 
 sbit LATCH1=P1^0;//DuanMA
 sbit LATCH2=P1^1;//WeiMA                
+sbit SPK=P1^2;          //speaker pin
+
 
 bit ReadTimeFlag;// 1->goto read time from rs1302
 bit ReadAlarmFlag;// 1->goto read time from rs1302
 bit SetClockFlag;
 bit SetAlarmFlag;//1->uart set rs1302 alarm time
-sbit SPK=P1^2;          //speaker pin
 
 
 unsigned char code dofly_DuanMa[10]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f};//negtive
@@ -56,22 +57,19 @@ code unsigned char FREQL[]={
 void Song(void)
 {
     unsigned char k,i;
-    while(1)
-    {
-        i=0;  
-        while(i<100)
-	    {         //“Ù¿÷ ˝◊È≥§∂» £¨≥™ÕÍ¥”Õ∑‘Ÿ¿¥        
-            k=MUSIC[i]+7*MUSIC[i+1]-1;//»•“Ù∑˚’Òµ¥∆µ¬ À˘–Ë ˝æ›
-            Timer0_H=FREQH[k];
-            Timer0_L=FREQL[k];
-            Time=MUSIC[i+2];          //Ω⁄≈ƒ ±≥§
-            i=i+3;
-            TH0=Timer0_H;//∏≥÷µ∂® ±∆˜ ±º‰£¨æˆ∂®∆µ¬ 
-            TL0=Timer0_L;
-            TR0=1;       //¥Úø™∂® ±∆˜
-            DelayUs2x(Time); //—” ±À˘–Ë“™µƒΩ⁄≈ƒ  
-        }
-    } 
+    i=0;  
+    while(i<100)
+	{      
+        k=MUSIC[i]+7*MUSIC[i+1]-1;
+        Timer0_H=FREQH[k];
+        Timer0_L=FREQL[k];
+        Time=MUSIC[i+2];          
+        i=i+3;
+        TH0=Timer0_H;
+        TL0=Timer0_L;
+        TR0=1;       
+        DelayUs2x(Time); 
+    }
 }
 /*-----------------------------------------
     to chech now is  o'clock 
@@ -80,10 +78,12 @@ bit is_sharp()
 {
     if(time_buf1[5]==0&&time_buf1[6]==0)
         return 1;
-} 
+}
+
 /*------------------------------------------------
                 main
 ------------------------------------------------*/
+
 void main (void)
 {
 	unsigned char i;
@@ -97,6 +97,7 @@ void main (void)
     while (1) //always loop
     {   
         
+        cnt+=10;
         /*-----------------------------------------------------
             handling uart set clk time
         -----------------------------------------------------*/  
@@ -119,7 +120,7 @@ void main (void)
 				alarm_buf1[i]=time_buf2[2*i]*10+time_buf2[2*i+1];
 			}//to combine digital to 
 			Ds1302_Alarm_Write_Time();
-			SetClockFlag=0;       //release signal
+			SetAlarmFlag=0;       //release signal
 		}
 		/*-----------------------------------------------------
             handling keyboard
@@ -127,9 +128,9 @@ void main (void)
         num=KeyScan();   //num return from keyboard
         if(num==1)
         {
-               displaynum++;
+            displaynum++;
             //decide which mode on 7segment displayer
-            if(displaynum==3)
+            if(displaynum==4)
                 displaynum=0;
         }
         /*---------------------------------------------------
@@ -174,9 +175,9 @@ void main (void)
             else if(displaynum==2)//display week and seconds on the 7segment displayer
             {
                 TempData[0]=0x40;    //display"-"
-                TempData[1]=dofly_DuanMa[time_buf1[7]%10];//gain the week's  digital    ex Friday  its 5
-                TempData[2]=0x40;    //display"-"
-                TempData[3]=0;
+                TempData[1]=dofly_DuanMa[time_buf1[7]/10];//gain the week's  digital    ex Friday  its 5
+                TempData[2]=dofly_DuanMa[time_buf1[7]%10];    //display"-"
+                TempData[3]=0x40;;
                 TempData[4]=0;
                 TempData[5]=0;//display nothing on the 5th digital of 7segment displayer
                 TempData[6]=dofly_DuanMa[time_buf1[6]/10];//gain the sec's lower digital    ex 15 its 5
@@ -187,7 +188,7 @@ void main (void)
         {
             ReadAlarmFlag=0;
             Ds1302_Alarm_Read_Time();
-            if(displaynum==4) //display time on the 7segment displayer
+            if(displaynum==3) //display time on the 7segment displayer
             {
                 TempData[0]=dofly_DuanMa[alarm_buf1[0]/10];//gain the hour's lower digital    ex 15 its 5
                 TempData[1]=dofly_DuanMa[alarm_buf1[0]%10];//gain the hour's higher digital ex 15 its 1
@@ -203,6 +204,7 @@ void main (void)
         Display(0,8);
         /*-----------------------------------------------------
             handling o'clock
+            to play song
         -----------------------------------------------------*/  
         if(is_sharp()){
             Song();
@@ -247,25 +249,29 @@ void DelayMs(unsigned char t)
 ------------------------------------------------*/
 void Display(unsigned char FirstBit,unsigned char Num)
 {
-    static unsigned char i=0;
+    unsigned char i=FirstBit;
+    while(i<Num)
+    {
+
+
       
 
-       DataPort=0;   //display all black
-       LATCH1=1;     //
-       LATCH1=0;
+        DataPort=0;   //display all black
+        LATCH1=1;     //
+        LATCH1=0;
 
-       DataPort=dofly_WeiMa[i+FirstBit]; //output which position
-       LATCH2=1;     //
-       LATCH2=0;
+        DataPort=dofly_WeiMa[i]; //output which position
+        LATCH2=1;     //
+        LATCH2=0;
 
-       DataPort=TempData[i]; //output
-       LATCH1=1;     //������
-       LATCH1=0;
+        DataPort=TempData[i]; //output
+        LATCH1=1;     //������
+        LATCH1=0;
        
-       i++;
-       if(i==Num)
-          i=0;
+        i++;
+        DelayUs2x(5);
 
+    }
 
 }
 
@@ -350,7 +356,7 @@ void UART_Init(void)
 void UART_SER (void) interrupt 4 
 {
     unsigned char Temp;          //place raw data 
-    unsigned char i;
+    static unsigned char i;
     static bit ins;             //to kept what ins
     static unsigned char len;   //to adjust the inst len
     if(RI)                        //receive some thing
