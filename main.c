@@ -8,7 +8,7 @@
 
 sbit LATCH1=P1^0;//DuanMA
 sbit LATCH2=P1^1;//WeiMA                
-sbit SPK=P1^2;          //speaker pin
+sbit SPK=P1^3;          //speaker pin
 
 
 bit ReadTimeFlag;// 1->goto read time from rs1302
@@ -31,6 +31,7 @@ unsigned char KeyScan(void);//handle which button be pressed
 void Init_Timer0(void);//
 
 void UART_Init(void);
+void putNote();
 unsigned char Timer0_H,Timer0_L,Time;//buffer of TH0 and TL0
                          // ¿…œ÷ª”–¬Ë¬Ë∫√ ˝æ›±Ì
 code unsigned char MUSIC[]={          6,2,3,      5,2,1,      3,2,2,    5,2,2,    1,3,2,    6,2,1,    5,2,1,
@@ -55,21 +56,32 @@ code unsigned char FREQL[]={
                                 };
 
 void Song(void)
-{
+{  
     unsigned char k,i;
-    i=0;  
     while(i<100)
-	{      
-        k=MUSIC[i]+7*MUSIC[i+1]-1;
-        Timer0_H=FREQH[k];
-        Timer0_L=FREQL[k];
-        Time=MUSIC[i+2];          
-        i=i+3;
-        TH0=Timer0_H;
-        TL0=Timer0_L;
-        TR0=1;       
-        DelayUs2x(Time); 
-    }
+	{         //�������鳤�� �������ͷ����        
+            k=MUSIC[i]+7*MUSIC[i+1]-1;//ȥ������Ƶ����������
+            Timer0_H=FREQH[k];
+            Timer0_L=FREQL[k];
+            Time=MUSIC[i+2];          //����ʱ��
+            i=i+3;
+            putNote();
+           
+    } 
+}
+void delay(unsigned char t)
+{
+    unsigned char i;
+	for(i=0;i<t;i++)
+	    DelayMs(250);
+    TR0=0;
+ }
+void putNote()
+{
+    TH0=Timer0_H;//��ֵ��ʱ��ʱ�䣬����Ƶ��
+    TL0=Timer0_L;
+    TR0=1;       //�򿪶�ʱ��
+    delay(Time); //��ʱ����Ҫ�Ľ���     
 }
 /*-----------------------------------------
     to chech now is  o'clock 
@@ -316,7 +328,8 @@ void Init_Timer0(void)
  //TL0=0x00;
  EA=1;            //enable total interrupt
  ET0=1;           //enable interupt from timer
- TR0=1;           //turn on timer0 to counting time
+ TR0=0;           //turn off timer0 to counting time
+ 
 }
 
 /*------------------------------------------------

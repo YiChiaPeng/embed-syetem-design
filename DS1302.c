@@ -71,13 +71,13 @@ unsigned char Ds1302_Read_Byte(unsigned char addr)
 	{
 	    //fetch out the lsb
 		if (addr & 0x01) 
-		   {
+		{
 			IO_SET;
-			}
+		}
 		else 
-		    {
+		{
 			IO_CLR;
-			}
+		}
 		//generating clk
 		SCK_SET;
 		SCK_CLR;
@@ -209,13 +209,13 @@ void Ds1302_Alarm_Read_Time(void)
 	
 }
 /*------------------------------------------------
-                DS1302��ʼ��
+                DS1302 Init
 ------------------------------------------------*/
 void Ds1302_Init(void)
 {
 	
-	RST_CLR;			//RST���õ�
-	SCK_CLR;			//SCK���õ�		 
+	RST_CLR;			//RST=0
+	SCK_CLR;			//SCK=0		 
 }
 
 
