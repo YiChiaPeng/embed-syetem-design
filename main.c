@@ -11,10 +11,10 @@ sbit LATCH2=P1^1;//WeiMA
 sbit SPK=P1^3;          //speaker pin
 
 
-bit ReadTimeFlag;// 1->goto read time from rs1302
-bit ReadAlarmFlag;// 1->goto read time from rs1302
-bit SetClockFlag;
-bit SetAlarmFlag;//1->uart set rs1302 alarm time
+bit ReadTimeFlag=1;// 1->goto read time from rs1302
+bit ReadAlarmFlag=1;// 1->goto read time from rs1302
+bit SetClockFlag=1;
+bit SetAlarmFlag=1;//1->uart set rs1302 alarm time
 
 
 unsigned char code dofly_DuanMa[10]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f};//negtive
@@ -58,6 +58,7 @@ code unsigned char FREQL[]={
 void Song(void)
 {  
     unsigned char k,i;
+    Init_Timer0();
     while(i<100)
 	{         //�������鳤�� �������ͷ����        
             k=MUSIC[i]+7*MUSIC[i+1]-1;//ȥ������Ƶ����������
@@ -68,6 +69,8 @@ void Song(void)
             putNote();
            
     } 
+   ReadTimeFlag=1;
+   ReadAlarmFlag=1;
 }
 void delay(unsigned char t)
 {
@@ -100,8 +103,8 @@ void main (void)
 {
 	unsigned char i;
     unsigned char num,displaynum;
-    static unsigned int cnt;    //by kept after how many instruction done to counting time then updated time from ds1302
-    Init_Timer0();
+    unsigned int cnt;    //by kept after how many instruction done to counting time then updated time from ds1302
+    //Init_Timer0();
     UART_Init();
     Ds1302_Init();
 
@@ -149,7 +152,7 @@ void main (void)
                 whether updated time from ds1302
         -----------------------------------------------------*/
         //suppose a num
-        if (cnt>20000)
+        if (cnt>2000)
         {
             ReadTimeFlag=1;
             ReadAlarmFlag=1;
@@ -367,7 +370,7 @@ void UART_Init(void)
                 UART isr
 ------------------------------------------------*/
 void UART_SER (void) interrupt 4 
-{
+{	unsigned j;
     unsigned char Temp;          //place raw data 
     static unsigned char i;
     static bit ins;             //to kept what ins
@@ -379,14 +382,18 @@ void UART_SER (void) interrupt 4
         if (Temp=='C')
         {
             ins=0;
+			i=0;
             len=16;
+		
         }
         else if (Temp=='A')
+
         {
             ins=1;
+			i=0;
             len=6;
         }
-        else
+        else if(Temp<='9'&&Temp>='0')
         {
             time_buf2[i]=Temp&0x0F;		//translate assci to demical
 		    i++;

@@ -6,7 +6,7 @@ unsigned char alarm_buf[3];//BCD
 //alarm_buf1[1]->min
 //alarm_buf1[2]->sec
 unsigned char time_buf2[16] ;
-unsigned char time_buf1[8] ;//demecial
+unsigned char time_buf1[8];//demecial
 unsigned char time_buf[8] ;                         //BCD
 /*------------------------------------------------
            ��DS1302д��һ�ֽ�����
