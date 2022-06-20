@@ -1,7 +1,6 @@
 #include<reg52.h> 
 #include "ds1302.h"
 
-
 #define KeyPort P3 //define button
 
 #define DataPort P0 //define bus for 7segment displayer 
@@ -9,7 +8,6 @@
 sbit LATCH1=P1^0;//DuanMA
 sbit LATCH2=P1^1;//WeiMA                
 sbit SPK=P1^3;          //speaker pin
-
 
 bit ReadTimeFlag=1;// 1->goto read time from rs1302
 bit ReadAlarmFlag=1;// 1->goto read time from rs1302
@@ -33,7 +31,10 @@ void Init_Timer0(void);//
 void UART_Init(void);
 void putNote();
 unsigned char Timer0_H,Timer0_L,Time;//buffer of TH0 and TL0
-                         // ¿…œ÷ª”–¬Ë¬Ë∫√ ˝æ›±Ì
+
+/*------------------------------------------
+                the song 
+--------------------------------------------*/
 code unsigned char MUSIC[]={          6,2,3,      5,2,1,      3,2,2,    5,2,2,    1,3,2,    6,2,1,    5,2,1,
                                       6,2,4,      3,2,2,      5,2,1,    6,2,1, 	  5,2,2, 	3,2,2, 	  1,2,1,
                                       6,1,1,      5,2,1,      3,2,1, 	2,2,4, 	  2,2,3, 	3,2,1,    5,2,2,
@@ -55,6 +56,9 @@ code unsigned char FREQL[]={
                                  0x47,0x77,0xA2,0xB6,0xDA,0xFA,0x16,
                                 };
 
+/*--------------------------------------------------------
+function to play song
+-----------------------------------------------------------*/
 void Song(void)
 {  
     unsigned char k,i;
@@ -79,6 +83,9 @@ void delay(unsigned char t)
 	    DelayMs(250);
     TR0=0;
  }
+/*-----------------------------------------------
+function to load correspond note counting time into timer0
+------------------------------------------------*/
 void putNote()
 {
     TH0=Timer0_H;//��ֵ��ʱ��ʱ�䣬����Ƶ��
@@ -91,10 +98,11 @@ void putNote()
 ------------------------------------------*/
 bit is_sharp()
 {
+    //whether minute and sec all equal 0
+    //mean a clock
     if(time_buf1[5]==0&&time_buf1[6]==0)
         return 1;
 }
-
 /*------------------------------------------------
                 main
 ------------------------------------------------*/
@@ -216,6 +224,9 @@ void main (void)
             }
 
         }
+        /*----------------------------------------------------
+        to display the DuanMa value of Temp on  7 segment displayer
+        -----------------------------------------------------*/
         Display(0,8);
         /*-----------------------------------------------------
             handling o'clock
@@ -235,19 +246,14 @@ void main (void)
     }
 }
 /*------------------------------------------------
- uS��ʱ����������������� unsigned char t���޷���ֵ
- unsigned char �Ƕ����޷����ַ���������ֵ�ķ�Χ��
- 0~255 ����ʹ�þ���12M����ȷ��ʱ��ʹ�û��,������ʱ
- �������� T=tx2+5 uS
+
 ------------------------------------------------*/
 void DelayUs2x(unsigned char t)
 {
  while(--t);
 }
 /*------------------------------------------------
- mS��ʱ����������������� unsigned char t���޷���ֵ
- unsigned char �Ƕ����޷����ַ���������ֵ�ķ�Χ��
- 0~255 ����ʹ�þ���12M����ȷ��ʱ��ʹ�û��
+
 ------------------------------------------------*/
 void DelayMs(unsigned char t)
 {
@@ -260,17 +266,13 @@ void DelayMs(unsigned char t)
  }
 }
 /*------------------------------------------------
- start display from which digital of 7seg displayer
+ start display from FirstBit digital  to Num of 7seg displayer
 ------------------------------------------------*/
 void Display(unsigned char FirstBit,unsigned char Num)
 {
     unsigned char i=FirstBit;
     while(i<Num)
     {
-
-
-      
-
         DataPort=0;   //display all black
         LATCH1=1;     //
         LATCH1=0;
@@ -289,8 +291,6 @@ void Display(unsigned char FirstBit,unsigned char Num)
     }
 
 }
-
-
 /*------------------------------------------------
             KeyScan
 ------------------------------------------------*/
@@ -323,15 +323,16 @@ unsigned char KeyScan(void)
 
 /*------------------------------------------------
                 Timer 0 initial
+Timer controll the speaker
 ------------------------------------------------*/
 void Init_Timer0(void)
 {
- TMOD |= 0x01;      //using timer mode 1 16bit counter to count time
- //TH0=0x00;      //assign initial value
- //TL0=0x00;
- EA=1;            //enable total interrupt
- ET0=1;           //enable interupt from timer
- TR0=0;           //turn off timer0 to counting time
+    TMOD |= 0x01;      //using timer mode 1 16bit counter to count time
+    //TH0=0x00;      //assign initial value
+    //TL0=0x00;
+    EA=1;            //enable total interrupt
+    ET0=1;           //enable interupt from timer
+    TR0=1;           //turn off timer0 to counting time
  
 }
 
@@ -379,30 +380,34 @@ void UART_SER (void) interrupt 4
     {
 	  	RI=0;                      	//clear the signal of receive some thing
 	  	Temp=SBUF;                 	//get the raw value 
+        //the C type instruction mean setting the clock time 
         if (Temp=='C')
         {
             ins=0;
+            //start counting the following 16 byte input
 			i=0;
-            len=16;
+            len=16;//ex 2022_0620_1104_3501
 		
         }
         else if (Temp=='A')
-
         {
             ins=1;
+            //start counting the following 6 byte input
 			i=0;
-            len=6;
+            len=6;//ex 1115_20 
         }
+        //mean receive number
         else if(Temp<='9'&&Temp>='0')
         {
             time_buf2[i]=Temp&0x0F;		//translate assci to demical
 		    i++;
-	  	    if(i==len)                  //it completly received 16 byte
+	  	    if(i==len)                  //it completly received 16 or 6 byte
 		    {
 	    	    i=0;
 			    
                 if (ins==0)
                 {
+                    //to avoid there are two instruction want to be process
                     SetAlarmFlag=0;
                     SetClockFlag=1;//1->update the ds1302 time 
                 }else{
@@ -416,7 +421,7 @@ void UART_SER (void) interrupt 4
       SBUF=Temp; //return what you receive to the sender
 	
 	}
-   	if(TI)  //����Ƿ��ͱ�־λ������
+   	if(TI)  //check whether can send
     	TI=0;
 } 
 
