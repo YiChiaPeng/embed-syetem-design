@@ -4,7 +4,7 @@
 #define KeyPort P3 //define button
 
 #define DataPort P0 //define bus for 7segment displayer 
-
+//coment
 sbit LATCH1=P1^0;//DuanMA
 sbit LATCH2=P1^1;//WeiMA                
 sbit SPK=P1^3;          //speaker pin
